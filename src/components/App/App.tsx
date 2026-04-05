@@ -15,7 +15,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-  const { data, isLoading, isError } = useQuery<MoviesResponse>({
+  const { data, isLoading, isError, isSuccess } = useQuery<MoviesResponse>({
     queryKey: ["movies", searchQuery, currentPage],
     queryFn: () => fetchMovies(searchQuery, currentPage),
     enabled: searchQuery.length > 0,
@@ -39,11 +39,11 @@ export default function App() {
   return (
     <>
       <SearchBar onSubmit={handleSearch} />
-      {data && (
+      {data && data.total_pages > 1 && (
         <Pagination
           pageCount={data.total_pages}
-          onPageChange={currentPage}
-          forcePage={setCurrentPage}
+          forcePage={currentPage}
+          onPageChange={setCurrentPage}
         />
       )}
 
@@ -54,7 +54,7 @@ export default function App() {
           onClose={() => setSelectedMovie(null)}
         />
       )}
-      {!isLoading && data && data.results.length > 0 && (
+      {!isLoading && isSuccess && data && data.results.length > 0 && (
         <MovieGrid movies={data.results} onSelect={handleSelectMovie} />
       )}
       {isError && <ErrorMessage />}
