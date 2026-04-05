@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import SearchBar from "../SearchBar/SearchBar";
 import fetchMovies from "../../services/movieService";
 import MovieGrid from "../MovieGrid/MovieGrid";
-import type { Movie, MoviesResponse } from "../../types/movie";
+import type { Movie } from "../../types/movie";
+import type { MoviesResponse } from "../../services/movieService";
 import toast from "react-hot-toast";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import Pagination from "../ReactPaginate/ReactPaginate";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
     queryKey: ["movies", searchQuery, currentPage],
     queryFn: () => fetchMovies(searchQuery, currentPage),
     enabled: searchQuery.length > 0,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
@@ -39,9 +41,9 @@ export default function App() {
       <SearchBar onSubmit={handleSearch} />
       {data && (
         <Pagination
-          totalPages={data.total_pages}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
+          pageCount={data.total_pages}
+          onPageChange={currentPage}
+          forcePage={setCurrentPage}
         />
       )}
 
